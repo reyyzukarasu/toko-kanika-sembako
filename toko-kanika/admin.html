@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Toko Kanika Sembako</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+      * {
+        font-family: "Inter", sans-serif;
+      }
+
+      .fade-in {
+        animation: fadeIn 0.3s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .hover-scale {
+        transition: transform 0.2s ease;
+      }
+
+      .hover-scale:hover {
+        transform: scale(1.02);
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <h1
+            class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent"
+          >
+            Admin Panel
+          </h1>
+          <div class="flex gap-3 items-center">
+            <a
+              href="index.html"
+              class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
+            >
+              ← Kembali ke Toko
+            </a>
+            <button
+              id="logout"
+              class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Form Tambah Produk -->
+      <section class="mb-12">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-semibold text-gray-800">Tambah Produk</h2>
+          <button
+            id="manage-categories"
+            class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors duration-200"
+          >
+            Kelola Kategori
+          </button>
+          <button
+            id="export-json"
+            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
+          >
+            Export JSON
+          </button>
+          <!-- Tambahkan setelah tombol Export JSON -->
+        </div>
+
+        <form
+          id="product-form"
+          class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-6 max-w-xl"
+        >
+          <div class="space-y-4">
+            <input
+              type="text"
+              id="name"
+              placeholder="Nama Produk"
+              required
+              class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            />
+
+            <div class="grid grid-cols-2 gap-4">
+              <input
+                type="number"
+                id="price"
+                placeholder="Harga (angka saja)"
+                required
+                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+
+              <select
+                id="category"
+                required
+                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="">-- Pilih Kategori --</option>
+                <option value="Sembako">Sembako</option>
+                <option value="Frozen Food">Frozen Food</option>
+                <option value="Snack & Minuman">Snack & Minuman</option>
+                <option value="Air Minum & Gas">Air Minum & Gas</option>
+                <option value="Es Krim">Es Krim</option>
+                <option value="Alat mandi & Peralatan Tubuh">
+                  Alat Mandi & Perawatan Tubuh
+                </option>
+                <option value="Alat Rumah Tangga">Alat Rumah Tangga</option>
+                <option value="Fashion">Fashion</option>
+              </select>
+            </div>
+
+            <input
+              type="text"
+              id="image_url"
+              placeholder="Link Gambar"
+              required
+              class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            />
+
+            <textarea
+              id="description"
+              placeholder="Deskripsi Produk"
+              required
+              class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[100px]"
+            ></textarea>
+
+            <button
+              type="submit"
+              class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+            >
+              Tambah Produk
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Daftar Produk -->
+      <section>
+        <div
+          class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+        >
+          <h2 class="text-xl font-semibold text-gray-800">Produk Toko</h2>
+          <div class="relative w-full sm:w-64">
+            <input
+              id="admin-search"
+              type="text"
+              placeholder="Cari produk..."
+              class="w-full border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div
+          id="product-list"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        ></div>
+
+        <div
+          class="mt-8 flex justify-center items-center gap-4"
+          id="pagination"
+        >
+          <button
+            id="prev-page"
+            class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+          >
+            « Prev
+          </button>
+          <span id="page-info" class="text-gray-700 font-medium"></span>
+          <button
+            id="next-page"
+            class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+          >
+            Next »
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tambahkan sebelum penutup tag body -->
+    <!-- Modal Kategori -->
+    <div
+      id="category-modal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50"
+    >
+      <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md fade-in">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-xl font-semibold text-gray-800">
+                Kelola Kategori
+              </h3>
+              <button
+                id="close-category-modal"
+                class="text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  class="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Form Tambah Kategori -->
+            <form id="category-form" class="mb-6">
+              <div class="flex gap-2">
+                <input
+                  type="text"
+                  id="new-category"
+                  placeholder="Nama Kategori Baru"
+                  required
+                  class="flex-1 p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
+                />
+                <button
+                  type="submit"
+                  class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                >
+                  Tambah
+                </button>
+              </div>
+            </form>
+
+            <!-- Daftar Kategori -->
+            <div
+              class="space-y-2 max-h-96 overflow-y-auto"
+              id="categories-list"
+            >
+              <!-- Kategori akan dimuat di sini -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+      const supabase = createClient(
+        "https://qxmhkdvfbissaomwjidi.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4bWhrZHZmYmlzc2FvbXdqaWRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MjA3MDMsImV4cCI6MjA3MjA5NjcwM30.Grk1qCgcB-JqCSEoy_E4J_8aWxCWbe8pC49jm_kfLyY"
+      );
+
+      let allProducts = [];
+      let currentPage = 1;
+      const itemsPerPage = 12;
+      let filteredProducts = [];
+      let editingId = null;
+
+      // Check admin access
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user || user.user_metadata?.role !== "admin") {
+        alert("Akses hanya untuk admin!");
+        window.location.href = "login.html";
+      }
+
+      // DOM elements
+      const form = document.getElementById("product-form");
+      const productList = document.getElementById("product-list");
+      const logoutBtn = document.getElementById("logout");
+
+      // Tambahkan variabel untuk menyimpan daftar kategori
+      let categories = [];
+
+      // Function untuk memuat kategori
+      async function loadCategories() {
+        const { data, error } = await supabase
+          .from("categories")
+          .select("*")
+          .order("name");
+
+        if (error) {
+          console.error("Error loading categories:", error);
+          return;
+        }
+
+        categories = data || [];
+        updateCategorySelects();
+        renderCategories();
+      }
+
+      // Function untuk memperbarui select kategori
+      function updateCategorySelects() {
+        const categorySelect = document.getElementById("category");
+        categorySelect.innerHTML =
+          '<option value="">-- Pilih Kategori --</option>';
+
+        categories.forEach((category) => {
+          const option = document.createElement("option");
+          option.value = category.name;
+          option.textContent = category.name;
+          categorySelect.appendChild(option);
+        });
+      }
+
+      // Function untuk menampilkan daftar kategori di modal
+      function renderCategories() {
+        const categoriesList = document.getElementById("categories-list");
+        categoriesList.innerHTML = categories
+          .map(
+            (category) => `
+    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+      <span class="font-medium text-gray-700">${category.name}</span>
+      <button 
+        data-id="${category.id}" 
+        class="delete-category text-red-500 hover:text-red-600 p-1"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+      </button>
+    </div>
+  `
+          )
+          .join("");
+
+        // Event listener untuk tombol hapus
+        document.querySelectorAll(".delete-category").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            if (!confirm("Yakin ingin menghapus kategori ini?")) return;
+
+            const id = btn.dataset.id;
+            const { error } = await supabase
+              .from("categories")
+              .delete()
+              .eq("id", id);
+
+            if (error) {
+              alert("Gagal menghapus kategori: " + error.message);
+              return;
+            }
+
+            loadCategories();
+          });
+        });
+      }
+
+      // Event listeners untuk modal kategori
+      document
+        .getElementById("manage-categories")
+        .addEventListener("click", () => {
+          document.getElementById("category-modal").classList.remove("hidden");
+          loadCategories();
+        });
+
+      document
+        .getElementById("close-category-modal")
+        .addEventListener("click", () => {
+          document.getElementById("category-modal").classList.add("hidden");
+        });
+
+      // Form tambah kategori
+      document
+        .getElementById("category-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const input = document.getElementById("new-category");
+          const name = input.value.trim();
+
+          if (!name) return;
+
+          const { error } = await supabase
+            .from("categories")
+            .insert([{ name }]);
+
+          if (error) {
+            alert("Gagal menambah kategori: " + error.message);
+            return;
+          }
+
+          input.value = "";
+          loadCategories();
+        });
+
+      // Tambahkan loadCategories() ke inisialisasi
+      loadCategories();
+
+      // Load products function
+      async function loadProducts() {
+        productList.innerHTML = `
+          <div class="col-span-full flex justify-center items-center py-12">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        `;
+
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .order("id", { ascending: false });
+
+        if (error) {
+          productList.innerHTML = `
+            <div class="col-span-full text-center text-red-500 py-12">
+              Gagal memuat produk: ${error.message}
+            </div>
+          `;
+          return;
+        }
+
+        allProducts = data;
+        filteredProducts = data;
+        renderPaginatedProducts();
+      }
+
+      // Render products function
+      function renderPaginatedProducts() {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const paginated = filteredProducts.slice(start, end);
+
+        if (paginated.length === 0) {
+          productList.innerHTML = `
+            <div class="col-span-full text-center text-gray-500 py-12">
+              Tidak ada produk.
+            </div>
+          `;
+          document.getElementById("pagination").classList.add("hidden");
+          return;
+        }
+
+        productList.innerHTML = paginated
+          .map(
+            (product) => `
+          <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm overflow-hidden hover-scale fade-in">
+            <img src="${product.image_url}" 
+                 class="w-full h-48 object-cover" 
+                 alt="${product.name}"
+                 loading="lazy"/>
+            <div class="p-4">
+              <h3 class="font-semibold text-lg text-gray-800 mb-2">${
+                product.name
+              }</h3>
+              <p class="text-sm text-gray-600 mb-3">${product.description}</p>
+              <p class="text-blue-600 font-semibold mb-2">
+                Rp${Number(product.price).toLocaleString("id-ID")}
+              </p>
+              <p class="text-sm text-gray-500 mb-4">
+                Kategori: ${product.category || "-"}
+              </p>
+              <div class="flex gap-2">
+                <button data-id="${product.id}" 
+                        class="flex-1 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors duration-200 edit-btn">
+                  Edit
+                </button>
+                <button data-id="${product.id}" 
+                        class="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 delete-btn">
+                  Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+        `
+          )
+          .join("");
+
+        document.getElementById("pagination").classList.remove("hidden");
+        document.getElementById(
+          "page-info"
+        ).textContent = `Halaman ${currentPage} dari ${Math.ceil(
+          filteredProducts.length / itemsPerPage
+        )}`;
+
+        setupEventListeners();
+      }
+
+      function setupEventListeners() {
+        // Delete button listeners
+        document.querySelectorAll(".delete-btn").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-id");
+
+            if (!confirm("Yakin ingin menghapus produk ini?")) return;
+
+            // Delete cart items first
+            const { error: cartError } = await supabase
+              .from("cart_items")
+              .delete()
+              .eq("product_id", id);
+
+            if (cartError) {
+              alert("Gagal menghapus dari keranjang!\n" + cartError.message);
+              return;
+            }
+
+            // Then delete the product
+            const { error: productError } = await supabase
+              .from("products")
+              .delete()
+              .eq("id", id);
+
+            if (productError) {
+              alert("Gagal menghapus produk!\n" + productError.message);
+              return;
+            }
+
+            editingId = null;
+            form.reset();
+            form.querySelector("button[type='submit']").textContent =
+              "Tambah Produk";
+            loadProducts();
+          });
+        });
+
+        // Edit button listeners
+        document.querySelectorAll(".edit-btn").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-id");
+            const { data, error } = await supabase
+              .from("products")
+              .select("*")
+              .eq("id", id)
+              .single();
+
+            if (error) {
+              alert("Gagal ambil data produk");
+              return;
+            }
+
+            form.name.value = data.name;
+            form.price.value = data.price;
+            form.category.value = data.category || "";
+            form.image_url.value = data.image_url;
+            form.description.value = data.description;
+            editingId = id;
+
+            const submitBtn = form.querySelector("button[type='submit']");
+            submitBtn.textContent = "Update Produk";
+
+            // Scroll to form
+            form.scrollIntoView({ behavior: "smooth" });
+          });
+        });
+      }
+
+      // Event Listeners
+      logoutBtn.addEventListener("click", async () => {
+        await supabase.auth.signOut();
+        window.location.href = "login.html";
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const submitBtn = form.querySelector("button[type='submit']");
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+          <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span class="ml-2">Menyimpan...</span>
+        `;
+
+        try {
+          const name = form.name.value.trim();
+          const price = parseFloat(form.price.value);
+          const category = form.category.value;
+          const image = form.image_url.value.trim();
+          const desc = form.description.value.trim();
+
+          if (
+            !name ||
+            !image ||
+            !desc ||
+            !category ||
+            isNaN(price) ||
+            price < 0
+          ) {
+            throw new Error("Isi form tidak valid!");
+          }
+
+          const newProduct = {
+            name,
+            price,
+            category,
+            image_url: image,
+            description: desc,
+          };
+
+          const { error } = editingId
+            ? await supabase
+                .from("products")
+                .update(newProduct)
+                .eq("id", editingId)
+            : await supabase.from("products").insert([newProduct]);
+
+          if (error) throw error;
+
+          form.reset();
+          editingId = null;
+          submitBtn.textContent = "Tambah Produk";
+          loadProducts();
+        } catch (error) {
+          alert(error.message || "Gagal menyimpan produk!");
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+      });
+
+      document.getElementById("admin-search").addEventListener("input", (e) => {
+        const keyword = e.target.value.toLowerCase().trim();
+        filteredProducts = allProducts.filter((p) =>
+          p.name.toLowerCase().includes(keyword)
+        );
+        currentPage = 1;
+        renderPaginatedProducts();
+      });
+
+      document
+        .getElementById("export-json")
+        .addEventListener("click", async () => {
+          try {
+            const { data, error } = await supabase.from("products").select("*");
+            if (error) throw error;
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], {
+              type: "application/json",
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `produk-toko-${
+              new Date().toISOString().split("T")[0]
+            }.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+          } catch (error) {
+            alert("Gagal mengekspor data: " + error.message);
+          }
+        });
+
+      document.getElementById("prev-page").addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderPaginatedProducts();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      });
+
+      document.getElementById("next-page").addEventListener("click", () => {
+        const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderPaginatedProducts();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      });
+
+      // Initialize
+      loadProducts();
+    </script>
+  </body>
+</html>

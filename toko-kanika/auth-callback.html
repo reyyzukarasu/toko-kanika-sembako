@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redirecting... - Toko Kanika Sembako</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+      * {
+        font-family: "Inter", sans-serif;
+      }
+
+      .loading-dots::after {
+        content: "...";
+        animation: dots 1.5s steps(5, end) infinite;
+      }
+
+      @keyframes dots {
+        0%,
+        20% {
+          content: "";
+        }
+        40% {
+          content: ".";
+        }
+        60% {
+          content: "..";
+        }
+        80%,
+        100% {
+          content: "...";
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.3s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .spinner {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center min-h-screen px-4"
+  >
+    <div class="text-center fade-in">
+      <!-- Logo -->
+      <h1
+        class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-8"
+      >
+        Toko Kanika Sembako
+      </h1>
+
+      <!-- Loading Card -->
+      <div
+        class="bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-lg w-full max-w-sm"
+      >
+        <div class="flex flex-col items-center gap-4">
+          <!-- Spinner -->
+          <svg
+            class="spinner h-12 w-12 text-blue-600"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+
+          <!-- Loading Message -->
+          <p class="text-gray-700 text-lg font-medium loading-dots">
+            Memeriksa akun Anda
+          </p>
+          <p class="text-gray-500 text-sm">
+            Anda akan dialihkan secara otomatis
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+      const supabase = createClient(
+        "https://qxmhkdvfbissaomwjidi.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4bWhrZHZmYmlzc2FvbXdqaWRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MjA3MDMsImV4cCI6MjA3MjA5NjcwM30.Grk1qCgcB-JqCSEoy_E4J_8aWxCWbe8pC49jm_kfLyY"
+      );
+
+      (async () => {
+        try {
+          const {
+            data: { user },
+            error: userError,
+          } = await supabase.auth.getUser();
+
+          if (userError || !user) {
+            throw new Error(userError?.message || "User tidak ditemukan");
+          }
+
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("name, address")
+            .eq("id", user.id)
+            .single();
+
+          if (profileError) {
+            throw new Error(profileError.message);
+          }
+
+          // Redirect based on profile completion
+          setTimeout(() => {
+            if (!profile || !profile.name || !profile.address) {
+              window.location.href = "/profile.html";
+            } else {
+              window.location.href = "/index.html";
+            }
+          }, 1000); // Slight delay for better UX
+        } catch (error) {
+          // Show error message
+          document.body.innerHTML = `
+            <div class="bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center min-h-screen px-4">
+              <div class="text-center fade-in">
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-8">
+                  Toko Kanika Sembako
+                </h1>
+                <div class="bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-lg w-full max-w-sm">
+                  <div class="flex flex-col items-center gap-4">
+                    <svg class="h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <p class="text-gray-700 text-lg font-medium">
+                      Gagal memverifikasi akun
+                    </p>
+                    <p class="text-gray-500 text-sm">
+                      ${error.message}
+                    </p>
+                    <a href="/login.html" 
+                       class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                      Kembali ke Login
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+
+          console.error("Auth error:", error);
+          setTimeout(() => {
+            window.location.href = "/login.html";
+          }, 3000);
+        }
+      })();
+    </script>
+  </body>
+</html>
